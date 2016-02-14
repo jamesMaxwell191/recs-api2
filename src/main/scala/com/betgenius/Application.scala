@@ -11,10 +11,9 @@ import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.Uri.Path.Segment
 import akka.stream.ActorMaterializer
-import com.betgenius.repository.EntityManager
+import com.betgenius.repository.{ActorModule, EntityManager}
 import scala.concurrent.Future
 import scala.concurrent.duration._
-import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 import akka.http.scaladsl.server.Directives._
 
 
@@ -32,21 +31,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * If the remote server comes back up it will not be accessible for an user in the cache
   * until the cached values expires.
   */
-object Application extends App with BetGenius {
-
-  implicit val actorSystem = ActorSystem("recs")
-
-  implicit val materializer = ActorMaterializer()
-
-  implicit val timeout = Timeout(60 seconds)
-
-  implicit val fixtureUnmarshaller = defaultNodeSeqUnmarshaller.map(toFixture(_))
+object Application extends App with BetGenius with ActorModule{
 
   val (host,port) = ("localhost",9142)
-
-  lazy val echoActor = actorSystem.actorOf(RoundRobinPool(5).props(EchoActor.props), "echoRouter")
-
-  lazy val entityActor = actorSystem.actorOf(RoundRobinPool(5).props(EntityManager.props), "entityRouter")
 
 
   val handler = Http().bindAndHandle(RouteResult.route2HandlerFlow(fixtureDataRoute),interface = host,port = port)

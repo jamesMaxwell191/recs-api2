@@ -1,36 +1,29 @@
 package com.betgenius
 
-import akka.actor.{ActorRef, ActorSystem}
-import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport
-import akka.http.scaladsl.model.HttpEntity
+import akka.actor.ActorRef
+import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.unmarshalling.Unmarshaller
-import akka.routing.RoundRobinPool
+import akka.pattern.ask
 import akka.util.Timeout
+import com.betgenius.Application._
 import com.betgenius.EchoActor.EchoMessage
 import com.betgenius.model.{Market, SportingFixture}
+import com.betgenius.repository.ActorModule
 import com.betgenius.repository.EntityManager.Persist
-import org.joda.time.DateTime
 
 import scala.collection.mutable
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
-import akka.pattern.ask
 import scala.concurrent.duration._
 import scala.xml.NodeSeq
 
 /**
   * Created by douglas on 06/02/16.
   */
-trait BetGenius extends ScalaXmlSupport {
+trait BetGenius  {
+  this:ActorModule =>
 
-  implicit val fixtureUnmarshaller:Unmarshaller[HttpEntity,SportingFixture]
+  implicit val fixtureUnmarshaller = defaultNodeSeqUnmarshaller.map(toFixture(_))
 
-  val echoActor:ActorRef
-
-  val entityActor : ActorRef
-
-  implicit val theTimeout = Timeout(15 seconds)
+  implicit val theTimeout = Timeout(5 seconds)
 
 
   def toFixture(nodeSeq:NodeSeq) :SportingFixture = nodeSeq match {

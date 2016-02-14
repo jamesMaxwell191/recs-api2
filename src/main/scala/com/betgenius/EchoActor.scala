@@ -1,16 +1,18 @@
 package com.betgenius
 
-import akka.actor.{Props, Actor}
+import akka.actor.{ActorLogging, Props, Actor}
 import com.betgenius.EchoActor.EchoMessage
 import org.joda.time.DateTime
 
 /**
   * Created by douglas on 06/02/16.
   */
-class EchoActor extends Actor{
+class EchoActor extends Actor with ActorLogging{
 
      override def receive = {
-       case EchoMessage(text) => println("sleeping in the echo actor " + DateTime.now); Thread.sleep(10000); sender ! s"hello there $text"
+       case EchoMessage(text) => log.info("processing an echo message")
+                        Thread.sleep(1500)
+                        sender ! s"hello there $text"
      }
 
 }
