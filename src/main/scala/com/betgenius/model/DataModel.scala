@@ -2,28 +2,53 @@ package com.betgenius.model
 import scala.xml.NodeSeq
 
 
-object SportingFixture {
+object ModelHelper {
+     def idNamePair(node:NodeSeq) = {
+       (((node \ "Id").text), (node \ "Name").text)
+     }
+}
+
+
+object UpdategramExtractor {
+     def fromXml(node:NodeSeq) = {
+       val cmdOption = CreateFixtureCmdExtractor.fromXml(node \ "CreateFixtureCmd")
+       UpdateGram(cmdOption, None)
+     }
+}
+
+object CreateFixtureCmdExtractor {
+     def fromXml(node:NodeSeq) = {
+         val elem = node \ "SportsFixture"
+         if(elem.size == 0) None else Some(CreateFixtureCmd(SportingFixtureExtractor.fromXml(elem)))
+     }
+}
+
+
+object SportingFixtureExtractor {
   def fromXml(node: NodeSeq) = {
-    println("extracting a sporting fixture")
-    val fixture = node \ "SportsFixture"
+    val (id,name) = ModelHelper.idNamePair(node)
+    SportsFixture(id, name,SportExtractor.fromXml(node \ "Sport"),CompetitionExtractor.fromXml(node \ "Competition"))
+  }
+}
 
-    if(fixture.length == 0) throw new IllegalArgumentException
+object SportExtractor {
+     def fromXml(node:NodeSeq) = {
+        val (id,name) = ModelHelper.idNamePair(node)
+        Sport(id,name)
+     }
+}
 
-    val id = (fixture \ "Id").text
-    val name = (fixture \ "Name").text
-
-    SportsFixture(id, name, None)
+object CompetitionExtractor {
+  def fromXml(node:NodeSeq) = {
+    val (id,name) = ModelHelper.idNamePair(node)
+    Competition(id,name)
   }
 }
 
 object MarketSetExtractor {
     def fromXml(node:NodeSeq) ={
-        println("extracting a market set")
-        val marketSet = node \ "MarketSet"
 
-        if(marketSet.length == 0) throw new IllegalArgumentException
-
-        val items = (List[Market]() /: (marketSet \ "Market")){ (l,m) =>
+        val items = (List[Market]() /: (node \ "Market")){ (l,m) =>
             MarketExtractor.fromXml(m) :: l
         }
         new MarketSet(items)
@@ -32,6 +57,7 @@ object MarketSetExtractor {
 
 object MarketExtractor {
      def fromXml(node:NodeSeq) ={
-         Market((node \ "Name").text)
+         val (id,name) = ModelHelper.idNamePair(node)
+         Market(id,name)
      }
 }

@@ -1,23 +1,37 @@
 package com.betgenius.repository
 
-import akka.actor.{ActorLogging, Props, Actor}
-import com.betgenius.model.{SportsFixture, SportingFixture}
+import akka.actor.{Actor, ActorLogging, Props}
+import akka.cluster.client.{ClusterClient, ClusterClientSettings}
+import akka.pattern.{ask, pipe}
+import akka.util.Timeout
+import com.betgenius.model.{UpdateGram, PersistenceResult, SportsFixture}
 import com.betgenius.repository.EntityManager.Persist
+
+import scala.concurrent.duration._
 
 /**
   * Created by douglas on 06/02/16.
   */
 class EntityManager extends Actor with ActorLogging{
 
-     override def receive = {
-       case Persist(fixture) => sender ! "Ack entity persisted"
-     }
+  import scala.concurrent.ExecutionContext.Implicits.global
+  implicit val timeout = Timeout(10 seconds)
+
+  val client = context.actorOf(ClusterClient.props(ClusterClientSettings(context.system)), "clusterClient")
+
+  override def receive = {
+
+    case Persist(updateGram) => println("received a sports fixture")
+      val result = (client ?  ClusterClient.Send("/user/sportingFixtureService", updateGram , localAffinity = true)).mapTo[String]
+      result.map(PersistenceResult(_)) pipeTo sender
+  }
 
 }
 
 object EntityManager {
 
-    def props = Props[EntityManager]
+  def props = Props[EntityManager]
 
-    case class Persist(fixture:SportsFixture)
+  case class Persist(updateGram:UpdateGram)
 }
+

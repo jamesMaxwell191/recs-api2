@@ -11,8 +11,6 @@ class EchoActor extends Actor with ActorLogging{
 
      override def receive = {
        case EchoMessage(text) => log.info("processing an echo message")
-                        Thread.sleep(1500)
-                        sender ! s"hello there $text"
      }
 
 }
