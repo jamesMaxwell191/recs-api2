@@ -1,21 +1,8 @@
 package com.betgenius
 
-import akka.actor.ActorSystem
-import akka.http.scaladsl.model.Uri.Path.Segment
-import akka.http.scaladsl.server.{RouteResult, Route, ExceptionHandler}
-import akka.pattern.ask
-import akka.routing.RoundRobinPool
-import akka.util.Timeout
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.model.Uri.Path.Segment
-import akka.stream.ActorMaterializer
-import com.betgenius.repository.{ActorModule, EntityManager}
-import scala.concurrent.Future
-import scala.concurrent.duration._
-import akka.http.scaladsl.server.Directives._
-
+import akka.http.scaladsl.server.RouteResult
+import com.betgenius.repository.ActorModule
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

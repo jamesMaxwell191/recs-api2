@@ -1,72 +1,52 @@
 package com.betgenius
 
-import akka.actor.ActorRef
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 import akka.http.scaladsl.server.Directives._
-import akka.pattern.ask
+import akka.stream.scaladsl.Flow
 import akka.util.Timeout
-import com.betgenius.Application._
-import com.betgenius.EchoActor.EchoMessage
-import com.betgenius.model.{Market, SportingFixture}
-import com.betgenius.repository.ActorModule
+import akka.pattern.ask
+import com.betgenius.model.{MarketSet, MarketSetExtractor, SportingFixture, SportsFixture}
 import com.betgenius.repository.EntityManager.Persist
+import com.betgenius.repository.{EntityManager, ActorModule}
 
-import scala.collection.mutable
 import scala.concurrent.duration._
-import scala.xml.NodeSeq
 
 /**
   * Created by douglas on 06/02/16.
   */
-trait BetGenius  {
-  this:ActorModule =>
+trait BetGenius {
 
-  implicit val fixtureUnmarshaller = defaultNodeSeqUnmarshaller.map(toFixture(_))
+  implicit val fixtureUnmarshaller = defaultNodeSeqUnmarshaller.map(SportingFixture.fromXml(_))
+
+  implicit val marketSetUnmarshaller = defaultNodeSeqUnmarshaller.map(MarketSetExtractor.fromXml(_))
 
   implicit val theTimeout = Timeout(5 seconds)
 
-
-  def toFixture(nodeSeq:NodeSeq) :SportingFixture = nodeSeq match {
-    case fixture @ <SportingFixture>{markets @ _*}</SportingFixture> => val buffer = mutable.MutableList[Market]()
-      for(m @ <Market>{_*}</Market> <- markets){
-          buffer += Market((m \ "@name").text)
-    }
-      SportingFixture((fixture \ "@name").text,buffer.toSeq)
-  }
-
-  val fixtureDataRoute = pathPrefix("betgenius") {
-    get {
-      path("tony") {
-        complete {
-          "hello world"
-        }
-      } ~
-        path("ping") {
-          complete {
-            "pong"
-          }
-        } ~
-        path("crash") {
-          complete {
-            "crash"
-          }
-        }
-    }
-  } ~
-    pathSingleSlash {
+  val fixtureDataRoute = path("marketUpdate") {
       get {
         complete {
-          (echoActor ? EchoMessage("joe")).mapTo[String]
+           "house of fun"
         }
       } ~
       post {
-         entity(as[SportingFixture]) { fixture =>
+         entity(as[SportsFixture]) { fixture =>
              complete {
-                 s"got the entity ${fixture.name} with market ${fixture.markets(0).name} ${fixture.markets(1).name}"
-               (entityActor ? Persist(fixture)).mapTo[String]
+                 val request = actorSystem.actorOf(EntityManager.props)
+                (request ? Persist(fixture)).mapTo[String]
              }
          }
+      } ~
+      post {
+        entity(as[MarketSet]) { markets =>
+          complete {
+            s"posted a market set with ${markets.markets.size} markets"
+          }
+        }
       }
     }
+
+  val persistFixtureFlow = Flow[SportsFixture].map(validate(_))
+
+  def validate(fixture:SportsFixture) = fixture
 
 }
