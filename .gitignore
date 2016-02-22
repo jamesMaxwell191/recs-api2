@@ -1,4 +1,5 @@
-target
+target/
 .idea/
 project/target/
 project/project/
+
