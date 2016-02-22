@@ -5,7 +5,6 @@ import akka.http.scaladsl.model.HttpResponse
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import com.betgenius.model.UpdateGram
-import com.betgenius.module.ActorModule
 
 import scala.concurrent.Future
 /**

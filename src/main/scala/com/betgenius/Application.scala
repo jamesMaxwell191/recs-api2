@@ -1,9 +1,12 @@
 package com.betgenius
 
+import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.RouteResult
-import com.betgenius.module.{ControllerModule, ActorModule}
-
+import akka.stream.ActorMaterializer
+import com.betgenius.controllers.UpdateGramController
+import com.betgenius.module.{ActorModule}
+import com.softwaremill.macwire._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
@@ -18,17 +21,15 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * If the remote server comes back up it will not be accessible for an user in the cache
   * until the cached values expires.
   */
-object Application extends App with BetGenius {
+object Application extends App with ActorModule with BetGenius {
 
   val (host,port) = ("localhost",9142)
 
-  val module = new ControllerModule with ActorModule
+  implicit val actorSystem = ActorSystem("BetGenius")
 
-  val datagramHandler = module.datagramHandler
+  implicit val materializer = ActorMaterializer()
 
-  implicit val actorSystem = module.actorSystem
-
-  implicit val materializer = module.materializer
+  val datagramHandler = wire[UpdateGramController]
 
 
   val handler = Http().bindAndHandle(RouteResult.route2HandlerFlow(fixtureDataRoute),interface = host,port = port)

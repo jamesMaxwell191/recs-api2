@@ -20,9 +20,7 @@ import scala.concurrent.duration._
   */
 trait ActorModule {
 
-  implicit val actorSystem = ActorSystem("recs")
-
-  implicit val materializer = ActorMaterializer()
+  implicit val actorSystem:ActorSystem
 
   implicit val timeout = Timeout(5 seconds)
 

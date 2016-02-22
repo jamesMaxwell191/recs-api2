@@ -24,6 +24,4 @@ libraryDependencies ++= Seq(
   "org.joda" % "joda-convert" % "1.7"
 )
 
-
-mainClass in assembly := Some("com.sky.assignment.Application")
     
