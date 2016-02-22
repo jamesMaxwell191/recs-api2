@@ -29,8 +29,8 @@ class RoutesTest extends WordSpec with Matchers with ScalatestRouteTest with Bet
     }
     "extract a fixture" in {
       datagramHandler
-      val xml = HttpEntity(ContentTypes.`text/xml(UTF-8)`, s"<?xml version='1.0' ?><Feed><SportsFixture><Id>123</Id><Name>Hibs vs Hearts</Name></SportsFixture></Feed>")
-      Post("/marketUpdate", xml) ~> fixtureDataRoute ~> check {
+      val xml = HttpEntity(ContentTypes.`text/xml(UTF-8)`, s"<?xml version='1.0' ?><UpdateGram><CreateFixtureCmd><SportsFixture><Id>123</Id><Name>Hibs vs Hearts</Name></SportsFixture></CreateFixtureCmd></UpdateGram>")
+      Post("/updategram", xml) ~> fixtureDataRoute ~> check {
         responseAs[String] shouldEqual "posted a fixture Hibs vs Rangers"
       }
     }

@@ -26,7 +26,7 @@ trait ActorModule {
 
   implicit val timeout = Timeout(5 seconds)
 
-  lazy val echoActor = actorSystem.actorOf(RoundRobinPool(20).props(EchoActor.props).withDispatcher("echo-dispatcher"), "echoRouter")
+  lazy val gtpRouter = actorSystem.actorOf(RoundRobinPool(20).props(EchoActor.props).withDispatcher("echo-dispatcher"), "gtpRouter")
 
   lazy val entityActor = actorSystem.actorOf(RoundRobinPool(5).props(EntityManager.props), "entityRouter")
 
@@ -34,7 +34,7 @@ trait ActorModule {
     Flow.fromGraph(GraphDSL.create() { implicit b =>
       import GraphDSL.Implicits._
       val broadcast = b.add(Broadcast[PersistenceResult](2))
-      broadcast.out(0).map(convertPersistentEntity(_)) ~> Sink.actorRef(echoActor,"gtpRouter")
+      broadcast.out(0).map(convertPersistentEntity(_)) ~> Sink.actorRef(gtpRouter,"gtpRouter")
       FlowShape(broadcast.in, broadcast.out(1))
     })
 
