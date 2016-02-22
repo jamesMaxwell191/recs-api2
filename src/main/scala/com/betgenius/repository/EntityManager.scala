@@ -21,7 +21,7 @@ class EntityManager extends Actor with ActorLogging{
 
   override def receive = {
 
-    case Persist(updateGram) => println("received a sports fixture")
+    case Persist(updateGram) => println("received an updategram")
       val result = (client ?  ClusterClient.Send("/user/sportingFixtureService", updateGram , localAffinity = true)).mapTo[String]
       result.map(PersistenceResult(_)) pipeTo sender
   }

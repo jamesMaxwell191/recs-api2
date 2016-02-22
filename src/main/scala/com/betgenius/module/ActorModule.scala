@@ -22,15 +22,15 @@ trait ActorModule {
 
   implicit val actorSystem = ActorSystem("recs")
 
-  implicit val mat = ActorMaterializer()
+  implicit val materializer = ActorMaterializer()
 
-  implicit val timeout = Timeout(10 seconds)
+  implicit val timeout = Timeout(5 seconds)
 
   lazy val echoActor = actorSystem.actorOf(RoundRobinPool(20).props(EchoActor.props).withDispatcher("echo-dispatcher"), "echoRouter")
 
   lazy val entityActor = actorSystem.actorOf(RoundRobinPool(5).props(EntityManager.props), "entityRouter")
 
-  val broadcastPersistenceResult =
+  lazy val broadcastPersistenceResult =
     Flow.fromGraph(GraphDSL.create() { implicit b =>
       import GraphDSL.Implicits._
       val broadcast = b.add(Broadcast[PersistenceResult](2))
@@ -39,7 +39,7 @@ trait ActorModule {
     })
 
 
-  implicit val updategramFlow:Flow[UpdateGram,HttpResponse,NotUsed] = Flow[UpdateGram].mapAsync(2){
+  lazy val updategramFlow:Flow[UpdateGram,HttpResponse,NotUsed] = Flow[UpdateGram].mapAsync(2){
     case ug @ UpdateGram(_,_) => (entityActor ? Persist(ug)).mapTo[PersistenceResult]
   }.via(broadcastPersistenceResult).map(f => HttpResponse(200, entity="successfully persisted the fixture"))
 

@@ -20,6 +20,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http-testkit-experimental" % akkaVersion,
   "joda-time" % "joda-time" % "2.8.1",
   "org.scalatest" %% "scalatest" % "2.2.4" % "test",
+  "org.scalamock" %% "scalamock-scalatest-support" % "3.2.2" % "test",
   "org.joda" % "joda-convert" % "1.7"
 )
 

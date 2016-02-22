@@ -3,9 +3,10 @@ package com.betgenius
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
 import akka.http.scaladsl.model.HttpResponse
 import akka.http.scaladsl.server.Directives._
+import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.util.Timeout
-import com.betgenius.controllers.UpdateGramController
+import com.betgenius.controllers.{UpdateGramControllerIf, UpdateGramController}
 import com.betgenius.model._
 import com.betgenius.module.{ControllerModule, ActorModule}
 
@@ -16,7 +17,10 @@ import scala.xml.NodeSeq
   * Created by douglas on 06/02/16.
   */
 trait BetGenius {
-  this:ControllerModule with ActorModule =>
+
+  def datagramHandler:UpdateGramControllerIf
+
+  implicit def materializer:ActorMaterializer
 
   implicit val fixtureUnmarshaller = defaultNodeSeqUnmarshaller.map(UpdategramExtractor.fromXml(_))
 

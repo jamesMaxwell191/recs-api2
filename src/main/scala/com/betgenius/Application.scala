@@ -18,9 +18,17 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * If the remote server comes back up it will not be accessible for an user in the cache
   * until the cached values expires.
   */
-object Application extends App with BetGenius with ControllerModule with ActorModule{
+object Application extends App with BetGenius {
 
   val (host,port) = ("localhost",9142)
+
+  val module = new ControllerModule with ActorModule
+
+  val datagramHandler = module.datagramHandler
+
+  implicit val actorSystem = module.actorSystem
+
+  implicit val materializer = module.materializer
 
 
   val handler = Http().bindAndHandle(RouteResult.route2HandlerFlow(fixtureDataRoute),interface = host,port = port)
