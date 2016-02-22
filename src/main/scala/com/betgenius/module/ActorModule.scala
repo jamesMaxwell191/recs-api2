@@ -40,7 +40,7 @@ trait ActorModule {
 
 
   lazy val updategramFlow:Flow[UpdateGram,HttpResponse,NotUsed] = Flow[UpdateGram].mapAsync(2){
-    case ug @ UpdateGram(_,_) => (entityActor ? Persist(ug)).mapTo[PersistenceResult]
+    case ug @ UpdateGram(_,_,_) => (entityActor ? Persist(ug)).mapTo[PersistenceResult]
   }.via(broadcastPersistenceResult).map(f => HttpResponse(200, entity="successfully persisted the fixture"))
 
   def convertPersistentEntity(result:PersistenceResult) ={

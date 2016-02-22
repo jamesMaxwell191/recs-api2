@@ -1,4 +1,9 @@
 package com.betgenius.model
+
+import java.util.UUID
+
+import org.joda.time.DateTime
+
 import scala.xml.NodeSeq
 
 
@@ -11,8 +16,18 @@ object ModelHelper {
 
 object UpdategramExtractor {
      def fromXml(node:NodeSeq) = {
+       val header = HeaderExtractor.fromXml(node \ "Header")
        val cmdOption = CreateFixtureCmdExtractor.fromXml(node \ "CreateFixtureCmd")
-       UpdateGram(cmdOption, None)
+       UpdateGram(header,cmdOption, None)
+     }
+}
+
+object HeaderExtractor {
+     def fromXml(node:NodeSeq) = {
+        val uuid = UUID.fromString( (node \ "MessageId").text)
+        val dateTime = DateTime.parse((node \ "DateTime").text)
+        val retry = (node \ "Retry").text.toInt
+        Header(uuid,dateTime,retry)
      }
 }
 
