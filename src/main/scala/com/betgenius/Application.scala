@@ -2,7 +2,7 @@ package com.betgenius
 
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.RouteResult
-import com.betgenius.repository.ActorModule
+import com.betgenius.module.{ControllerModule, ActorModule}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -18,7 +18,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * If the remote server comes back up it will not be accessible for an user in the cache
   * until the cached values expires.
   */
-object Application extends App with BetGenius with ActorModule{
+object Application extends App with BetGenius with ControllerModule with ActorModule{
 
   val (host,port) = ("localhost",9142)
 

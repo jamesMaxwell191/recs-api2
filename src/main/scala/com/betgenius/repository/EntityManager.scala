@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorLogging, Props}
 import akka.cluster.client.{ClusterClient, ClusterClientSettings}
 import akka.pattern.{ask, pipe}
 import akka.util.Timeout
-import com.betgenius.model.{UpdateGram, PersistenceResult, SportsFixture}
+import com.betgenius.model.{UpdateGram, PersistenceResult}
 import com.betgenius.repository.EntityManager.Persist
 
 import scala.concurrent.duration._

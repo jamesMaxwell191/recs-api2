@@ -5,8 +5,9 @@ import akka.http.scaladsl.model.HttpResponse
 import akka.http.scaladsl.server.Directives._
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.util.Timeout
+import com.betgenius.controllers.UpdateGramController
 import com.betgenius.model._
-import com.betgenius.repository.ActorModule
+import com.betgenius.module.{ControllerModule, ActorModule}
 
 import scala.concurrent.duration._
 import scala.xml.NodeSeq
@@ -15,7 +16,7 @@ import scala.xml.NodeSeq
   * Created by douglas on 06/02/16.
   */
 trait BetGenius {
-  this: ActorModule =>
+  this:ControllerModule with ActorModule =>
 
   implicit val fixtureUnmarshaller = defaultNodeSeqUnmarshaller.map(UpdategramExtractor.fromXml(_))
 
@@ -30,9 +31,7 @@ trait BetGenius {
       post {
         entity(as[UpdateGram]) { updategram =>
           complete {
-            val flow = Source.single(updategram).via(updategramFlow)
-            val result = flow.runWith(Sink.head[HttpResponse])
-            result
+             datagramHandler handle updategram
           }
         }
       }

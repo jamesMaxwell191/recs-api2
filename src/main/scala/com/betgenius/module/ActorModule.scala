@@ -1,15 +1,18 @@
-package com.betgenius.repository
+package com.betgenius.module
 
-import akka.actor.{Actor, ActorSystem}
-import akka.http.scaladsl.model.{HttpResponse, Uri, HttpMethods, HttpRequest}
+import akka.NotUsed
+import akka.actor.ActorSystem
+import akka.http.scaladsl.model.HttpResponse
+import akka.pattern.ask
 import akka.routing.RoundRobinPool
-import akka.stream.{FlowShape, ActorMaterializer}
-import akka.stream.scaladsl.{Sink, Broadcast, GraphDSL, Flow}
+import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Sink}
+import akka.stream.{ActorMaterializer, FlowShape}
 import akka.util.Timeout
 import com.betgenius.EchoActor
-import com.betgenius.model.{UpdateGram, PersistenceResult}
+import com.betgenius.model.{PersistenceResult, UpdateGram}
+import com.betgenius.repository.EntityManager
 import com.betgenius.repository.EntityManager.Persist
-import akka.pattern.ask
+
 import scala.concurrent.duration._
 
 /**
@@ -19,7 +22,7 @@ trait ActorModule {
 
   implicit val actorSystem = ActorSystem("recs")
 
-  implicit val materializer = ActorMaterializer()
+  implicit val mat = ActorMaterializer()
 
   implicit val timeout = Timeout(10 seconds)
 
@@ -36,7 +39,7 @@ trait ActorModule {
     })
 
 
-  val updategramFlow = Flow[UpdateGram].mapAsync(2){
+  implicit val updategramFlow:Flow[UpdateGram,HttpResponse,NotUsed] = Flow[UpdateGram].mapAsync(2){
     case ug @ UpdateGram(_,_) => (entityActor ? Persist(ug)).mapTo[PersistenceResult]
   }.via(broadcastPersistenceResult).map(f => HttpResponse(200, entity="successfully persisted the fixture"))
 
